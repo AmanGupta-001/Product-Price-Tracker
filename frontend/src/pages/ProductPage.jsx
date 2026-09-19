@@ -60,26 +60,71 @@ export default function ProductPage() {
     setScraping(true);
     setScrapeFeedback(null);
     try {
-      const { data } = await api.post(`/products/${id}/scrape`);
-      await load();
-      if (data?.ok) {
-        setScrapeFeedback({
-          type: 'success',
-          message: `Scrape completed: ${formatPrice(data.price, 'INR')} (${data.inStock ? 'In Stock' : 'Out of Stock'})`,
-        });
-      } else {
-        setScrapeFeedback({
-          type: 'error',
-          message: `Scrape notice: ${data?.reason || 'Could not validate price'}`,
-        });
-      }
+      // Step 1: Fire the scrape — backend responds immediately with 202.
+      await api.post(`/products/${id}/scrape`);
+
+      // Step 2: Poll the status endpoint every 3 seconds (up to 2 minutes).
+      const MAX_POLLS = 40; // 40 × 3s = 2 minutes
+      let polls = 0;
+      const poll = async () => {
+        polls++;
+        try {
+          const { data: statusData } = await api.get(`/products/${id}/scrape/status`);
+          if (statusData.status === 'pending' && polls < MAX_POLLS) {
+            setTimeout(poll, 3000);
+            return;
+          }
+
+          // Reload fresh data from DB regardless of outcome
+          await load();
+
+          if (statusData.status === 'done' && statusData.result?.ok) {
+            const r = statusData.result;
+            setScrapeFeedback({
+              type: 'success',
+              message: `Scrape completed: ${formatPrice(r.price, 'INR')} (${r.inStock ? 'In Stock' : 'Out of Stock'})`,
+            });
+          } else if (statusData.status === 'error') {
+            setScrapeFeedback({
+              type: 'error',
+              message: `Scrape error: ${statusData.error || 'Unknown error'}`,
+            });
+          } else if (statusData.status === 'done' && !statusData.result?.ok) {
+            await load();
+            setScrapeFeedback({
+              type: 'error',
+              message: `Scrape notice: ${statusData.result?.reason || 'Could not validate price'}`,
+            });
+          } else {
+            // Timed out polling
+            await load();
+            setScrapeFeedback({
+              type: 'error',
+              message: 'Scrape is taking longer than expected. Check the scrape logs tab.',
+            });
+          }
+        } catch (pollErr) {
+          console.warn('Poll error:', pollErr);
+          if (polls < MAX_POLLS) {
+            setTimeout(poll, 3000);
+            return; // don't fall through to setScraping
+          } else {
+            setScrapeFeedback({ type: 'error', message: 'Could not reach server.' });
+          }
+        }
+        // Reached here = polling ended (success, final error, or max polls)
+        setScraping(false);
+      };
+
+      // Start polling after initial 3s delay
+      setTimeout(poll, 3000);
+
     } catch (err) {
-      console.error('Manual scrape failed:', err);
+      console.error('Manual scrape trigger failed:', err);
       setScrapeFeedback({
         type: 'error',
-        message: `Scrape failed: ${err.response?.data?.error ?? err.message}`,
+        message: `Could not trigger scrape: ${err.response?.data?.error ?? err.message}`,
       });
-    } finally {
       setScraping(false);
     }
   };

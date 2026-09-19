@@ -34,8 +34,13 @@ router.post('/scrape/run', async (req, res) => {
   }
 });
 
-// Manual trigger for one product (used by the "scrape now" button, if any,
-// and handy for testing/demoing without waiting for the cron schedule).
+// In-memory store for live scrape results (keyed by productId, cleared after read).
+// Avoids a DB round-trip just to communicate the scrape outcome back to the UI.
+const scrapeResultCache = new Map();
+
+// Manual trigger for one product — responds immediately with 202 so Render's
+// 30 s HTTP timeout is never hit, then runs Playwright in the background.
+// The frontend polls /products/:id/scrape/status for the outcome.
 router.post('/products/:id/scrape', async (req, res) => {
   const { data: product, error } = await supabase
     .from('tracked_products')
@@ -45,8 +50,31 @@ router.post('/products/:id/scrape', async (req, res) => {
 
   if (error || !product) return res.status(404).json({ error: 'product not found' });
 
-  const result = await runScrapeForProduct(product);
-  res.json(result);
+  // Clear any stale result for this product before starting a new run.
+  scrapeResultCache.delete(req.params.id);
+
+  // Fire and forget — run in background, store result for polling.
+  runScrapeForProduct(product)
+    .then((result) => {
+      scrapeResultCache.set(req.params.id, { status: 'done', result, ts: Date.now() });
+      console.log(`[manual scrape] product ${req.params.id} done:`, JSON.stringify(result));
+    })
+    .catch((err) => {
+      scrapeResultCache.set(req.params.id, { status: 'error', error: err.message, ts: Date.now() });
+      console.error(`[manual scrape] product ${req.params.id} error:`, err);
+    });
+
+  res.status(202).json({ status: 'accepted', productId: req.params.id });
+});
+
+// Poll this after triggering a manual scrape. Returns {status:'pending'} until done.
+router.get('/products/:id/scrape/status', (req, res) => {
+  const cached = scrapeResultCache.get(req.params.id);
+  if (!cached) return res.json({ status: 'pending' });
+
+  // Return the result and clear from cache (one-time read).
+  scrapeResultCache.delete(req.params.id);
+  res.json(cached);
 });
 
 // ---------------------------------------------------------------
