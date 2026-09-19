@@ -2,7 +2,6 @@
 import { useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
-import StockBadge from '../components/StockBadge';
 import './SearchPage.css';
 
 export default function SearchPage() {
@@ -80,6 +79,24 @@ export default function SearchPage() {
           {loading && <span className="spinner" />}
         </div>
 
+        {/* Quick Suggestion Chips */}
+        <div className="search-suggestions fade-in">
+          <span className="text-xs text-muted">Try searching:</span>
+          {['iPhone', 'Wireless', 'Headphones', 'Watch', 'Shoes', 'Speaker'].map((term) => (
+            <button
+              key={term}
+              type="button"
+              className="suggestion-chip"
+              onClick={() => {
+                setQuery(term);
+                search(term);
+              }}
+            >
+              {term}
+            </button>
+          ))}
+        </div>
+
         {/* Error */}
         {error && (
           <div className="search-error fade-in">⚠️ {error}</div>
@@ -88,7 +105,7 @@ export default function SearchPage() {
         {/* Empty query hint */}
         {!query.trim() && !loading && (
           <div className="search-hint fade-in">
-            <p className="text-muted text-sm">Start typing to search through the product catalog.</p>
+            <p className="text-muted text-sm">Start typing or click a suggestion above to browse the catalog.</p>
           </div>
         )}
 

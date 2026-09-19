@@ -29,6 +29,7 @@ export default function ScrapeLog({ logs }) {
             <th>Status</th>
             <th>Duration</th>
             <th>HTTP</th>
+            <th>Signature</th>
             <th>Error</th>
             <th>Time</th>
           </tr>
@@ -56,6 +57,19 @@ export default function ScrapeLog({ logs }) {
                       {log.http_status}
                     </span>
                   ) : '—'}
+                </td>
+                <td>
+                  {log.structure_signature ? (
+                    <span
+                      className="badge badge-muted mono"
+                      style={{ fontSize: '0.72rem', letterSpacing: '0.02em' }}
+                      title={`DOM Structure Signature: ${log.structure_signature}`}
+                    >
+                      #{log.structure_signature.slice(0, 7)}
+                    </span>
+                  ) : (
+                    <span className="text-muted">—</span>
+                  )}
                 </td>
                 <td className="log-error">
                   {log.error_message

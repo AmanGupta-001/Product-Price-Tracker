@@ -6,7 +6,33 @@
   display: flex;
   align-items: center;
   max-width: 680px;
-  margin-bottom: 32px;
+  margin-bottom: 16px;
+}
+
+.search-suggestions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-width: 680px;
+  margin-bottom: 28px;
+}
+
+.suggestion-chip {
+  padding: 5px 12px;
+  font-size: 0.8rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 99px;
+  color: var(--text-secondary);
+  transition: var(--transition);
+}
+
+.suggestion-chip:hover {
+  background: var(--bg-elevated);
+  border-color: var(--border-mid);
+  color: var(--accent-blue);
+  transform: translateY(-1px);
 }
 
 .search-icon {

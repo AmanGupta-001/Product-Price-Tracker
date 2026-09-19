@@ -25,6 +25,7 @@ export default function ProductPage() {
   const [loading, setLoading]   = useState(true);
   const [error, setError]       = useState(null);
   const [scraping, setScraping] = useState(false);
+  const [scrapeFeedback, setScrapeFeedback] = useState(null);
   const [activeTab, setActiveTab] = useState('chart'); // 'chart' | 'logs'
 
   const load = useCallback(async () => {
@@ -49,13 +50,35 @@ export default function ProductPage() {
 
   useEffect(() => { load(); }, [load]);
 
+  useEffect(() => {
+    if (!scrapeFeedback) return;
+    const timer = setTimeout(() => setScrapeFeedback(null), 6000);
+    return () => clearTimeout(timer);
+  }, [scrapeFeedback]);
+
   const handleManualScrape = async () => {
     setScraping(true);
+    setScrapeFeedback(null);
     try {
-      await api.post(`/products/${id}/scrape`);
+      const { data } = await api.post(`/products/${id}/scrape`);
       await load();
+      if (data?.ok) {
+        setScrapeFeedback({
+          type: 'success',
+          message: `Scrape successful! Extracted: ${formatPrice(data.price, 'INR')} (${data.inStock ? 'In Stock' : 'Out of Stock'})`,
+        });
+      } else {
+        setScrapeFeedback({
+          type: 'error',
+          message: `Scrape completed with notice: ${data?.reason || 'Could not validate price'}`,
+        });
+      }
     } catch (err) {
       console.error('Manual scrape failed:', err);
+      setScrapeFeedback({
+        type: 'error',
+        message: `Scrape failed: ${err.response?.data?.error ?? err.message}`,
+      });
     } finally {
       setScraping(false);
     }
@@ -107,6 +130,22 @@ export default function ProductPage() {
           <span className="text-sm">{product.name}</span>
         </div>
 
+        {/* Scrape Feedback Banner */}
+        {scrapeFeedback && (
+          <div className={`scrape-feedback-banner fade-in ${scrapeFeedback.type}`}>
+            <span className="sfb-icon">{scrapeFeedback.type === 'success' ? '✅' : '⚠️'}</span>
+            <span className="sfb-text">{scrapeFeedback.message}</span>
+            <button
+              type="button"
+              className="sfb-close"
+              onClick={() => setScrapeFeedback(null)}
+              aria-label="Close"
+            >
+              ✕
+            </button>
+          </div>
+        )}
+
         {/* Product header */}
         <div className="pp-header card fade-in">
           <div className="pp-header-left">
@@ -114,15 +153,21 @@ export default function ProductPage() {
               <h1 className="pp-name">{product.name}</h1>
               <StockBadge inStock={latest?.in_stock ?? null} stockQty={latest?.stock_qty ?? null} />
             </div>
-            {product.store_product_id && (
-              <p className="text-xs text-muted mono mt-1">Store ID: #{product.store_product_id}</p>
-            )}
-            {product.product_url && (
-              <a href={product.product_url} target="_blank" rel="noopener noreferrer"
-                className="pp-store-link text-xs mt-2">
-                View on Store ↗
-              </a>
-            )}
+
+            <div className="pp-meta-tags mt-2">
+              {product.store_product_id && (
+                <span className="badge badge-muted mono text-xs">ID #{product.store_product_id}</span>
+              )}
+              <span className="badge badge-muted text-xs">
+                ⏱️ Interval: Every {product.scrape_interval_minutes ? Math.round(product.scrape_interval_minutes / 60) : 2}h
+              </span>
+              {product.product_url && (
+                <a href={product.product_url} target="_blank" rel="noopener noreferrer"
+                  className="pp-store-link text-xs">
+                  View on Store ↗
+                </a>
+              )}
+            </div>
           </div>
 
           <div className="pp-price-block">
@@ -153,10 +198,10 @@ export default function ProductPage() {
             onClick={handleManualScrape}
             disabled={scraping}
           >
-            {scraping ? <><span className="spinner" /> Scraping…</> : '⟳ Scrape Now'}
+            {scraping ? <><span className="spinner" /> Scraping live with Playwright…</> : '⟳ Scrape Now'}
           </button>
           <p className="text-xs text-muted">
-            Scheduled scrapes run automatically via cron-job.org.
+            Runs browser automation in the cloud. Scheduled scrapes run every 2h via cron-job.org.
           </p>
         </div>
 
