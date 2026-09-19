@@ -43,13 +43,15 @@
 }
 
 .pc-price-value {
-  font-size: 1.6rem;
-  font-weight: 800;
-  letter-spacing: -0.03em;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
   line-height: 1;
 }
 
-.pc-price-empty { font-style: italic; }
+.pc-price-empty { font-style: normal; }
 
 .pc-footer {
   display: flex;
@@ -60,10 +62,12 @@
 }
 
 .pc-view-link {
-  color: var(--accent-blue);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
   font-weight: 500;
-  opacity: 0;
   transition: var(--transition);
 }
 
-.product-card:hover .pc-view-link { opacity: 1; }
+.product-card:hover .pc-view-link {
+  color: var(--text-primary);
+}

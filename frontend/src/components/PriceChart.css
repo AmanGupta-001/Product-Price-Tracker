@@ -8,7 +8,7 @@
 }
 
 .chart-stat {
-  background: var(--bg-elevated);
+  background: var(--bg-card);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   padding: 14px 16px;
@@ -19,21 +19,21 @@
 
 .stat-label {
   font-size: 0.7rem;
-  font-weight: 600;
+  font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-muted);
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
 }
 
 .stat-value {
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   font-weight: 700;
   color: var(--text-primary);
   font-variant-numeric: tabular-nums;
 }
 
 .chart-area {
-  background: var(--bg-elevated);
+  background: var(--bg-card);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   padding: 20px 12px 12px;
@@ -42,11 +42,13 @@
 .chart-tooltip {
   padding: 10px 14px;
   border-radius: var(--radius-sm);
-  min-width: 160px;
+  min-width: 150px;
+  background: rgba(16, 20, 31, 0.95);
+  border: 1px solid var(--border-mid);
 }
 
 .tooltip-date {
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   color: var(--text-muted);
   margin-bottom: 4px;
 }
@@ -54,10 +56,8 @@
 .tooltip-price {
   font-size: 1.1rem;
   font-weight: 700;
-  background: linear-gradient(135deg, #60a5fa, #a78bfa);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
 }
 
 .tooltip-stock { font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px; }

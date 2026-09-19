@@ -36,11 +36,9 @@ export default function ProductCard({ product }) {
 
       <div className="pc-price">
         {latest?.price != null ? (
-          <>
-            <span className="pc-price-value gradient-text">
-              {formatPrice(latest.price, latest.currency)}
-            </span>
-          </>
+          <span className="pc-price-value">
+            {formatPrice(latest.price, latest.currency)}
+          </span>
         ) : (
           <span className="pc-price-empty text-muted text-sm">No data yet</span>
         )}

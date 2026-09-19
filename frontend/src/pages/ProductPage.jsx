@@ -1,4 +1,3 @@
-// src/pages/ProductPage.jsx
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { formatDistanceToNow, format } from 'date-fns';
@@ -6,6 +5,7 @@ import api from '../api';
 import StockBadge from '../components/StockBadge';
 import PriceChart from '../components/PriceChart';
 import ScrapeLog from '../components/ScrapeLog';
+import { RefreshCwIcon, ExternalLinkIcon, ChartIcon, LogsIcon, ClockIcon } from '../components/Icons';
 import './ProductPage.css';
 
 function formatPrice(price, currency = 'INR') {
@@ -65,12 +65,12 @@ export default function ProductPage() {
       if (data?.ok) {
         setScrapeFeedback({
           type: 'success',
-          message: `Scrape successful! Extracted: ${formatPrice(data.price, 'INR')} (${data.inStock ? 'In Stock' : 'Out of Stock'})`,
+          message: `Scrape completed: ${formatPrice(data.price, 'INR')} (${data.inStock ? 'In Stock' : 'Out of Stock'})`,
         });
       } else {
         setScrapeFeedback({
           type: 'error',
-          message: `Scrape completed with notice: ${data?.reason || 'Could not validate price'}`,
+          message: `Scrape notice: ${data?.reason || 'Could not validate price'}`,
         });
       }
     } catch (err) {
@@ -86,7 +86,7 @@ export default function ProductPage() {
 
   if (loading) return (
     <div className="page container">
-      <div className="skeleton mb-4" style={{ height: 32, width: 200 }} />
+      <div className="skeleton mb-4" style={{ height: 28, width: 160 }} />
       <div className="skeleton mb-6" style={{ height: 100 }} />
       <div className="skeleton" style={{ height: 320 }} />
     </div>
@@ -95,9 +95,8 @@ export default function ProductPage() {
   if (error) return (
     <div className="page container">
       <div className="empty-state">
-        <div className="icon">💥</div>
         <h3>Error loading product</h3>
-        <p>{error}</p>
+        <p className="text-muted">{error}</p>
         <button className="btn btn-secondary mt-4" onClick={load}>Retry</button>
       </div>
     </div>
@@ -106,9 +105,8 @@ export default function ProductPage() {
   if (!product) return (
     <div className="page container">
       <div className="empty-state">
-        <div className="icon">🕵️</div>
         <h3>Product not found</h3>
-        <p>It may have been removed from tracking.</p>
+        <p className="text-muted">It may have been removed from tracking.</p>
         <Link to="/" className="btn btn-primary mt-4">Back to Dashboard</Link>
       </div>
     </div>
@@ -126,14 +124,13 @@ export default function ProductPage() {
         {/* Breadcrumb */}
         <div className="breadcrumb fade-in">
           <Link to="/" className="text-muted text-sm">Dashboard</Link>
-          <span className="text-muted">›</span>
-          <span className="text-sm">{product.name}</span>
+          <span className="text-muted">/</span>
+          <span className="text-sm font-medium">{product.name}</span>
         </div>
 
         {/* Scrape Feedback Banner */}
         {scrapeFeedback && (
           <div className={`scrape-feedback-banner fade-in ${scrapeFeedback.type}`}>
-            <span className="sfb-icon">{scrapeFeedback.type === 'success' ? '✅' : '⚠️'}</span>
             <span className="sfb-text">{scrapeFeedback.message}</span>
             <button
               type="button"
@@ -156,22 +153,22 @@ export default function ProductPage() {
 
             <div className="pp-meta-tags mt-2">
               {product.store_product_id && (
-                <span className="badge badge-muted mono text-xs">ID #{product.store_product_id}</span>
+                <span className="badge badge-muted mono text-xs">SKU #{product.store_product_id}</span>
               )}
               <span className="badge badge-muted text-xs">
-                ⏱️ Interval: Every {product.scrape_interval_minutes ? Math.round(product.scrape_interval_minutes / 60) : 2}h
+                <ClockIcon size={12} /> Every {product.scrape_interval_minutes ? Math.round(product.scrape_interval_minutes / 60) : 2}h
               </span>
               {product.product_url && (
                 <a href={product.product_url} target="_blank" rel="noopener noreferrer"
                   className="pp-store-link text-xs">
-                  View on Store ↗
+                  View on Store <ExternalLinkIcon size={11} />
                 </a>
               )}
             </div>
           </div>
 
           <div className="pp-price-block">
-            <span className="pp-price gradient-text">
+            <span className="pp-price">
               {curPrice != null ? formatPrice(curPrice, latest?.currency) : 'No data yet'}
             </span>
             {priceDelta !== null && (
@@ -198,10 +195,11 @@ export default function ProductPage() {
             onClick={handleManualScrape}
             disabled={scraping}
           >
-            {scraping ? <><span className="spinner" /> Scraping live with Playwright…</> : '⟳ Scrape Now'}
+            <RefreshCwIcon size={14} className={scraping ? 'spinner' : ''} />
+            {scraping ? 'Scraping live…' : 'Scrape Now'}
           </button>
           <p className="text-xs text-muted">
-            Runs browser automation in the cloud. Scheduled scrapes run every 2h via cron-job.org.
+            Triggers a live Playwright run. Scheduled runs occur automatically every 2h.
           </p>
         </div>
 
@@ -212,7 +210,7 @@ export default function ProductPage() {
             className={`tab-btn ${activeTab === 'chart' ? 'active' : ''}`}
             onClick={() => setActiveTab('chart')}
           >
-            📊 Price History
+            <ChartIcon size={15} /> Price History
             <span className="tab-count">{history.length}</span>
           </button>
           <button
@@ -220,7 +218,7 @@ export default function ProductPage() {
             className={`tab-btn ${activeTab === 'logs' ? 'active' : ''}`}
             onClick={() => setActiveTab('logs')}
           >
-            🪵 Scrape Logs
+            <LogsIcon size={15} /> Scrape Logs
             <span className="tab-count">{logs.length}</span>
           </button>
         </div>

@@ -1,8 +1,8 @@
-// src/pages/DashboardPage.jsx
 import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api';
 import ProductCard from '../components/ProductCard';
+import { LayersIcon } from '../components/Icons';
 import './DashboardPage.css';
 
 export default function DashboardPage() {
@@ -37,16 +37,13 @@ export default function DashboardPage() {
         {/* Hero header */}
         <div className="dash-hero fade-in">
           <div>
-            <h1>
-              <span className="gradient-text">Price Dashboard</span>
-            </h1>
+            <h1 className="dash-title">Tracked Products</h1>
             <p className="text-muted mt-2">
-              Live price & stock tracking for your watched products.
-              Auto-refreshes every 60 s.
+              Continuous price & stock monitoring. Auto-refreshes every 60s.
             </p>
           </div>
           <Link to="/search" className="btn btn-primary">
-            + Track a Product
+            + Track Product
           </Link>
         </div>
 
@@ -55,25 +52,37 @@ export default function DashboardPage() {
           <div className="dash-stats fade-in">
             <div className="dash-stat">
               <span className="ds-number">{products.length}</span>
-              <span className="ds-label">Tracked</span>
+              <span className="ds-label">
+                <span className="ds-dot" style={{ background: 'var(--accent-blue)' }} />
+                Total Tracked
+              </span>
             </div>
             <div className="dash-stat">
               <span className="ds-number" style={{ color: 'var(--accent-emerald)' }}>
                 {products.filter((p) => p.latest_prices?.[0]?.in_stock).length}
               </span>
-              <span className="ds-label">In Stock</span>
+              <span className="ds-label">
+                <span className="ds-dot" style={{ background: 'var(--accent-emerald)' }} />
+                In Stock
+              </span>
             </div>
             <div className="dash-stat">
               <span className="ds-number" style={{ color: 'var(--accent-rose)' }}>
                 {products.filter((p) => p.latest_prices?.[0]?.in_stock === false).length}
               </span>
-              <span className="ds-label">Out of Stock</span>
+              <span className="ds-label">
+                <span className="ds-dot" style={{ background: 'var(--accent-rose)' }} />
+                Out of Stock
+              </span>
             </div>
             <div className="dash-stat">
               <span className="ds-number" style={{ color: 'var(--accent-amber)' }}>
                 {products.filter((p) => !p.latest_prices?.[0]).length}
               </span>
-              <span className="ds-label">Pending</span>
+              <span className="ds-label">
+                <span className="ds-dot" style={{ background: 'var(--accent-amber)' }} />
+                Pending
+              </span>
             </div>
           </div>
         )}
@@ -91,7 +100,6 @@ export default function DashboardPage() {
 
         {error && (
           <div className="error-banner fade-in">
-            <span>⚠️</span>
             <span>{error}</span>
             <button className="btn btn-sm btn-secondary" onClick={load}>Retry</button>
           </div>
@@ -99,12 +107,14 @@ export default function DashboardPage() {
 
         {!loading && !error && products.length === 0 && (
           <div className="empty-state fade-in">
-            <div className="icon">🛍️</div>
+            <div className="empty-state-icon">
+              <LayersIcon size={40} />
+            </div>
             <h3>No products tracked yet</h3>
-            <p className="mt-2">
-              Search for a product and click <strong>Track</strong> to start monitoring its price.
+            <p className="mt-2 text-muted">
+              Search for any catalog product to start tracking historical prices.
             </p>
-            <Link to="/search" className="btn btn-primary mt-4">Search Products</Link>
+            <Link to="/search" className="btn btn-primary mt-4">Search Catalog</Link>
           </div>
         )}
 

@@ -10,6 +10,7 @@ import {
   ReferenceLine,
 } from 'recharts';
 import { format } from 'date-fns';
+import { ChartIcon } from './Icons';
 import './PriceChart.css';
 
 function formatPrice(v) {
@@ -40,9 +41,11 @@ export default function PriceChart({ history }) {
   if (!history?.length) {
     return (
       <div className="empty-state">
-        <div className="icon">📊</div>
+        <div className="empty-state-icon">
+          <ChartIcon size={32} />
+        </div>
         <h3>No price history yet</h3>
-        <p>Trigger a manual scrape or wait for the next scheduled run.</p>
+        <p className="text-muted">Trigger a manual scrape or wait for the next scheduled run.</p>
       </div>
     );
   }

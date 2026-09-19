@@ -1,5 +1,5 @@
-// src/components/ScrapeLog.jsx
 import { format } from 'date-fns';
+import { LogsIcon } from './Icons';
 import './ScrapeLog.css';
 
 const STATUS_META = {
@@ -12,9 +12,11 @@ export default function ScrapeLog({ logs }) {
   if (!logs?.length) {
     return (
       <div className="empty-state">
-        <div className="icon">🪵</div>
+        <div className="empty-state-icon">
+          <LogsIcon size={32} />
+        </div>
         <h3>No scrape logs yet</h3>
-        <p>Logs appear after the first scrape attempt.</p>
+        <p className="text-muted">Logs appear after the first scrape attempt.</p>
       </div>
     );
   }

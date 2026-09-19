@@ -35,20 +35,23 @@
   transform: translateY(-1px);
 }
 
-.search-icon {
+.search-icon-box {
   position: absolute;
   left: 16px;
-  font-size: 1.1rem;
+  color: var(--text-muted);
   pointer-events: none;
   z-index: 1;
+  display: flex;
+  align-items: center;
 }
 
 .search-input {
   padding-left: 48px;
   padding-right: 48px;
-  font-size: 1rem;
-  height: 52px;
+  font-size: 0.95rem;
+  height: 48px;
   border-radius: var(--radius-md);
+  background: var(--bg-card);
 }
 
 .search-bar-wrap .spinner {

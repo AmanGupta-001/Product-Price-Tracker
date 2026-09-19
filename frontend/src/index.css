@@ -6,37 +6,34 @@
 
 /* ── Tokens ─────────────────────────────────────────────── */
 :root {
-  --bg-base: #0a0b0f;
-  --bg-surface: #111318;
-  --bg-elevated: #1a1d26;
-  --bg-card: #14171f;
-  --bg-card-hover: #1c2030;
+  --bg-base: #0b0d14;
+  --bg-surface: #10141f;
+  --bg-elevated: #151a28;
+  --bg-card: #131724;
+  --bg-card-hover: #181e2e;
 
-  --border-subtle: rgba(255,255,255,0.06);
-  --border-mid: rgba(255,255,255,0.10);
-  --border-focus: rgba(99,179,237,0.6);
+  --border-subtle: rgba(255, 255, 255, 0.07);
+  --border-mid: rgba(255, 255, 255, 0.12);
+  --border-focus: rgba(59, 130, 246, 0.5);
 
-  --accent-blue: #60a5fa;
-  --accent-blue-glow: rgba(96,165,250,0.18);
-  --accent-violet: #a78bfa;
-  --accent-violet-glow: rgba(167,139,250,0.18);
-  --accent-emerald: #34d399;
-  --accent-rose: #fb7185;
-  --accent-amber: #fbbf24;
+  --accent-blue: #3b82f6;
+  --accent-blue-glow: rgba(59, 130, 246, 0.12);
+  --accent-violet: #8b5cf6;
+  --accent-emerald: #10b981;
+  --accent-rose: #f43f5e;
+  --accent-amber: #f59e0b;
 
-  --text-primary: #f0f2f8;
+  --text-primary: #f8fafc;
   --text-secondary: #94a3b8;
-  --text-muted: #4a5568;
+  --text-muted: #64748b;
 
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 20px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
 
-  --shadow-card: 0 4px 24px rgba(0,0,0,0.4);
-  --shadow-glow-blue: 0 0 20px rgba(96,165,250,0.15);
-
-  --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.35);
+  --transition: 0.18s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ── Reset ───────────────────────────────────────────────── */
@@ -45,7 +42,7 @@
 html { scroll-behavior: smooth; }
 
 body {
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   background-color: var(--bg-base);
   color: var(--text-primary);
   line-height: 1.6;
@@ -65,10 +62,10 @@ ul, ol { list-style: none; }
 ::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 99px; }
 
 /* ── Typography ──────────────────────────────────────────── */
-h1, h2, h3, h4 { font-weight: 700; line-height: 1.2; letter-spacing: -0.02em; }
-h1 { font-size: clamp(1.8rem, 4vw, 2.6rem); }
-h2 { font-size: clamp(1.3rem, 3vw, 1.8rem); }
-h3 { font-size: 1.1rem; }
+h1, h2, h3, h4 { font-weight: 700; line-height: 1.25; letter-spacing: -0.025em; color: var(--text-primary); }
+h1 { font-size: clamp(1.75rem, 3.5vw, 2.4rem); }
+h2 { font-size: clamp(1.25rem, 2.5vw, 1.65rem); }
+h3 { font-size: 1.05rem; }
 
 code, .mono {
   font-family: 'JetBrains Mono', monospace;
@@ -77,14 +74,14 @@ code, .mono {
 
 /* ── Layout ──────────────────────────────────────────────── */
 .container {
-  max-width: 1280px;
+  max-width: 1240px;
   margin: 0 auto;
   padding: 0 24px;
 }
 
 .page {
   min-height: calc(100vh - 64px);
-  padding: 40px 0 80px;
+  padding: 36px 0 72px;
 }
 
 /* ── Cards ───────────────────────────────────────────────── */
@@ -99,35 +96,37 @@ code, .mono {
 .card:hover {
   background: var(--bg-card-hover);
   border-color: var(--border-mid);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-card), var(--shadow-glow-blue);
+  transform: translateY(-1px);
 }
 
 /* ── Buttons ─────────────────────────────────────────────── */
 .btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  padding: 10px 20px;
+  padding: 9px 18px;
   border-radius: var(--radius-sm);
   font-size: 0.875rem;
-  font-weight: 600;
+  font-weight: 500;
   transition: var(--transition);
   white-space: nowrap;
 }
 
+/* Modern devtool solid white button (Linear/Vercel style) */
 .btn-primary {
-  background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-violet) 100%);
-  color: #fff;
-  box-shadow: 0 2px 12px rgba(96,165,250,0.35);
+  background: #f8fafc;
+  color: #0b0d14;
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.25);
 }
 .btn-primary:hover {
-  filter: brightness(1.1);
-  box-shadow: 0 4px 20px rgba(96,165,250,0.5);
+  background: #ffffff;
+  box-shadow: 0 2px 10px rgba(255,255,255,0.18);
   transform: translateY(-1px);
 }
 .btn-primary:disabled {
-  opacity: 0.5;
+  opacity: 0.6;
   cursor: not-allowed;
   transform: none;
 }
@@ -139,8 +138,7 @@ code, .mono {
 }
 .btn-secondary:hover {
   background: var(--bg-card-hover);
-  border-color: var(--accent-blue);
-  color: var(--accent-blue);
+  border-color: rgba(255,255,255,0.25);
 }
 
 .btn-ghost {
@@ -149,13 +147,13 @@ code, .mono {
 }
 .btn-ghost:hover { color: var(--text-primary); background: var(--bg-elevated); border-radius: var(--radius-sm); }
 
-.btn-sm { padding: 6px 14px; font-size: 0.8rem; }
+.btn-sm { padding: 6px 13px; font-size: 0.8rem; }
 .btn-danger {
-  background: rgba(251, 113, 133, 0.12);
+  background: rgba(244, 63, 94, 0.1);
   color: var(--accent-rose);
-  border: 1px solid rgba(251,113,133,0.25);
+  border: 1px solid rgba(244, 63, 94, 0.22);
 }
-.btn-danger:hover { background: rgba(251,113,133,0.2); }
+.btn-danger:hover { background: rgba(244, 63, 94, 0.18); }
 
 /* ── Badges ──────────────────────────────────────────────── */
 .badge {
@@ -332,24 +330,25 @@ tr:hover td { background: var(--bg-elevated); }
 
 /* ── Gradient text ───────────────────────────────────────── */
 .gradient-text {
-  background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-violet) 100%);
+  background: linear-gradient(180deg, #ffffff 0%, #cbd5e1 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  font-weight: 700;
 }
 
 /* ── Glassmorphism panel ─────────────────────────────────── */
 .glass {
-  background: rgba(20, 23, 31, 0.6);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--border-subtle);
+  background: rgba(11, 13, 20, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 /* ── Hero gradient background ────────────────────────────── */
 .hero-gradient {
-  background: radial-gradient(ellipse at 50% 0%, rgba(96,165,250,0.08) 0%, transparent 60%),
-              radial-gradient(ellipse at 80% 50%, rgba(167,139,250,0.06) 0%, transparent 50%);
+  background: radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.04) 0%, transparent 60%),
+              radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.03) 0%, transparent 50%);
 }
 
 /* ── Section header ──────────────────────────────────────── */

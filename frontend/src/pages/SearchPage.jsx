@@ -2,6 +2,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
+import { SearchIcon, CheckIcon } from '../components/Icons';
 import './SearchPage.css';
 
 export default function SearchPage() {
@@ -56,22 +57,22 @@ export default function SearchPage() {
     <div className="page hero-gradient">
       <div className="container">
         <div className="search-hero fade-in">
-          <h1>
-            Find a <span className="gradient-text">Product</span>
-          </h1>
+          <h1>Catalog Search</h1>
           <p className="text-muted mt-2">
-            Search the store catalog and click <strong>Track</strong> to start monitoring price & stock.
+            Search products by name or SKU, then click <strong>Track</strong> to record prices.
           </p>
         </div>
 
         {/* Search input */}
         <div className="search-bar-wrap fade-in">
-          <div className="search-icon">🔍</div>
+          <span className="search-icon-box">
+            <SearchIcon size={18} />
+          </span>
           <input
             id="product-search-input"
             type="text"
             className="input search-input"
-            placeholder="e.g. iPhone 15, Wireless Headphones…"
+            placeholder="Search catalog (e.g. iPhone 15, Wireless Headphones, Watch)…"
             value={query}
             onChange={handleInput}
             autoFocus
@@ -81,7 +82,7 @@ export default function SearchPage() {
 
         {/* Quick Suggestion Chips */}
         <div className="search-suggestions fade-in">
-          <span className="text-xs text-muted">Try searching:</span>
+          <span className="text-xs text-muted">Popular searches:</span>
           {['iPhone', 'Wireless', 'Headphones', 'Watch', 'Shoes', 'Speaker'].map((term) => (
             <button
               key={term}
@@ -99,22 +100,24 @@ export default function SearchPage() {
 
         {/* Error */}
         {error && (
-          <div className="search-error fade-in">⚠️ {error}</div>
+          <div className="search-error fade-in">{error}</div>
         )}
 
         {/* Empty query hint */}
         {!query.trim() && !loading && (
           <div className="search-hint fade-in">
-            <p className="text-muted text-sm">Start typing or click a suggestion above to browse the catalog.</p>
+            <p className="text-muted text-sm">Type a search query or pick a suggestion above.</p>
           </div>
         )}
 
         {/* No results */}
         {query.trim() && !loading && results.length === 0 && !error && (
           <div className="empty-state fade-in">
-            <div className="icon">🔎</div>
+            <div className="empty-state-icon">
+              <SearchIcon size={32} />
+            </div>
             <h3>No products found</h3>
-            <p>Try a different search term.</p>
+            <p className="text-muted">Try a different search term or category keyword.</p>
           </div>
         )}
 
@@ -142,7 +145,9 @@ export default function SearchPage() {
 
                   <div className="sri-action">
                     {state === 'done' ? (
-                      <span className="badge badge-green">✓ Tracked!</span>
+                      <span className="badge badge-green">
+                        <CheckIcon size={12} /> Tracked
+                      </span>
                     ) : state === 'error' ? (
                       <button className="btn btn-danger btn-sm" onClick={() => handleTrack(p)}>
                         Retry
@@ -154,7 +159,7 @@ export default function SearchPage() {
                       </button>
                     ) : (
                       <button className="btn btn-primary btn-sm" onClick={() => handleTrack(p)}>
-                        + Track
+                        Track
                       </button>
                     )}
                   </div>
