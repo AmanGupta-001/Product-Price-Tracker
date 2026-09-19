@@ -3,6 +3,7 @@ const express = require('express');
 const { supabase } = require('./db');
 const { searchProducts } = require('./scraper/catalogClient');
 const { runScrapeForAllActive, runScrapeForProduct } = require('./scraper/scrapeRunner');
+const { sendPriceDropAlert, sendBackInStockAlert, isReady } = require('./alerts');
 
 const router = express.Router();
 
@@ -157,6 +158,51 @@ router.get('/products/:id/logs', async (req, res) => {
 
   if (error) return res.status(500).json({ error: error.message });
   res.json(data);
+});
+
+// ---------------------------------------------------------------
+// Alert config status + test endpoint (protected by cron secret).
+// Hit this to verify SendGrid is wired up correctly.
+// ---------------------------------------------------------------
+router.get('/alerts/status', (req, res) => {
+  res.json({
+    configured: isReady(),
+    alertEmail: process.env.ALERT_EMAIL
+      ? `${process.env.ALERT_EMAIL.slice(0, 3)}***` // partial mask for safety
+      : null,
+    thresholdPct: parseFloat(process.env.ALERT_THRESHOLD_PCT ?? '1'),
+    cooldownHours: parseFloat(process.env.ALERT_COOLDOWN_HOURS ?? '6'),
+  });
+});
+
+router.post('/alerts/test', async (req, res) => {
+  const secret = req.header('X-Cron-Secret');
+  if (!secret || secret !== process.env.CRON_SECRET) {
+    return res.status(401).json({ error: 'unauthorized' });
+  }
+  if (!isReady()) {
+    return res.status(503).json({
+      error: 'SendGrid not configured. Set SENDGRID_API_KEY and ALERT_EMAIL env vars.',
+    });
+  }
+
+  const mockProduct = {
+    id: 'test',
+    name: 'Test Product (Vista Headphones Plus)',
+    product_url: process.env.FRONTEND_URL || 'https://your-app.vercel.app',
+  };
+
+  try {
+    await sendPriceDropAlert({
+      product:  mockProduct,
+      oldPrice: 5999,
+      newPrice: 4799,
+      currency: 'INR',
+    });
+    res.json({ ok: true, message: `Test price-drop alert sent to ${process.env.ALERT_EMAIL}` });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 module.exports = router;

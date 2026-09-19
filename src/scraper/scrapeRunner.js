@@ -8,6 +8,7 @@
 const { randomUUID } = require('crypto');
 const { supabase } = require('../db');
 const { scrapeProduct } = require('./productScraper');
+const { sendPriceDropAlert, sendBackInStockAlert, ALERT_THRESHOLD_PCT } = require('../alerts');
 
 /**
  * Sanity bounds beyond what productScraper already checks, catching
@@ -75,6 +76,16 @@ async function runScrapeForProduct(trackedProduct) {
     return { productId, runId, ok: false, reason: 'implausible price, rejected' };
   }
 
+  // Fetch the most recent PREVIOUS price before writing the new one
+  // (used for alert diffing — compare old vs new).
+  const { data: prevRow } = await supabase
+    .from('price_history')
+    .select('price, in_stock')
+    .eq('product_id', productId)
+    .order('scraped_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
   const { error: historyError } = await supabase.from('price_history').insert({
     product_id: productId,
     price,
@@ -87,6 +98,24 @@ async function runScrapeForProduct(trackedProduct) {
     console.error(`[price_history insert] product ${productId}:`, historyError.message);
     return { productId, runId, ok: false, reason: 'db write failed' };
   }
+
+  // ── Alert checks (fire-and-forget; never block the scrape result) ───────
+  const prevPrice   = prevRow ? Number(prevRow.price) : null;
+  const wasInStock  = prevRow?.in_stock ?? null;
+
+  if (prevPrice !== null && price < prevPrice) {
+    const pctDrop = ((prevPrice - price) / prevPrice) * 100;
+    if (pctDrop >= ALERT_THRESHOLD_PCT) {
+      sendPriceDropAlert({ product: trackedProduct, oldPrice: prevPrice, newPrice: price, currency })
+        .catch((e) => console.error('[alerts] priceDrop error:', e.message));
+    }
+  }
+
+  if (inStock === true && wasInStock === false) {
+    sendBackInStockAlert({ product: trackedProduct, price, currency })
+      .catch((e) => console.error('[alerts] backInStock error:', e.message));
+  }
+  // ────────────────────────────────────────────────────────────────────────
 
   return { productId, runId, ok: true, price, inStock, stockQty };
 }

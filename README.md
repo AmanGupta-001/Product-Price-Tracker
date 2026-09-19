@@ -26,6 +26,7 @@ A full-stack product price & stock monitoring tool built for the INE Software En
 │   │   ├── catalogClient.js    # Fetches /api/catalog for product search
 │   │   ├── productScraper.js   # Playwright scraper (handles WASM/encrypted price)
 │   │   └── scrapeRunner.js     # Bridges scraper output → Supabase DB
+│   ├── alerts.js               # SendGrid email alerts (price drop & back-in-stock)
 │   ├── db.js                   # Supabase client
 │   └── routes.js               # Express route definitions
 ├── frontend/                   # React (Vite) app
@@ -89,6 +90,8 @@ The Vite dev server proxies `/api/*` to `http://localhost:3001` automatically.
 | `GET` | `/api/products/:id/history` | — | Full price history |
 | `GET` | `/api/products/:id/logs` | — | All scrape attempt logs |
 | `POST` | `/api/scrape/run` | `X-Cron-Secret` header | Cron-triggered batch scrape |
+| `GET` | `/api/alerts/status` | — | SendGrid configuration status |
+| `POST` | `/api/alerts/test` | `X-Cron-Secret` header | Send test price-drop alert email |
 
 ## Deployment
 
@@ -114,6 +117,31 @@ The Vite dev server proxies `/api/*` to `http://localhost:3001` automatically.
    - **Method**: POST
    - **Custom Header**: `X-Cron-Secret: <your CRON_SECRET value>`
    - **Schedule**: Every 2 hours (or as needed)
+
+## Email Alerts (SendGrid)
+
+The backend includes automated email notification service powered by `@sendgrid/mail`:
+
+- **Price-Drop Alerts**: Fires whenever a newly scraped price is lower than the previous recorded price by at least `ALERT_THRESHOLD_PCT` (default `1%`). Formatted in INR with savings calculation and direct link.
+- **Back-in-Stock Alerts**: Fires when an item transitions from out-of-stock (`in_stock: false`) to in-stock (`in_stock: true`).
+- **Spam / Cooldown Protection**: Per-product cooldown (`ALERT_COOLDOWN_HOURS`, default `6h`) prevents email fatigue from frequent re-scrapes.
+- **Fire-and-Forget**: Alert sending runs asynchronously in the background and will never block or fail the core scrape runner.
+
+### Configuration
+Set the following environment variables on Render / local `.env`:
+```env
+SENDGRID_API_KEY=SG.your_api_key_here
+ALERT_EMAIL=recipient@example.com
+FROM_EMAIL=verified_sender@example.com   # Must be a verified Single Sender or domain in SendGrid
+ALERT_THRESHOLD_PCT=1                    # Min % drop to trigger alert (optional, default 1)
+ALERT_COOLDOWN_HOURS=6                   # Min hours between alerts for same product (optional, default 6)
+```
+
+To test SendGrid configuration:
+```bash
+curl -X POST https://your-render-service.onrender.com/api/alerts/test \
+  -H "X-Cron-Secret: your-cron-secret-here"
+```
 
 ## Headed Scraper & Demo Recording
 
