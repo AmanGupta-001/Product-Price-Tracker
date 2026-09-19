@@ -24,8 +24,10 @@ router.post('/scrape/run', async (req, res) => {
   // and let the dashboard reflect results once written.
   res.status(202).json({ status: 'accepted' });
 
+  const force = req.query.force === 'true' || req.body?.force === true;
+
   try {
-    const results = await runScrapeForAllActive();
+    const results = await runScrapeForAllActive({ force });
     console.log('[cron scrape run] complete:', JSON.stringify(results));
   } catch (err) {
     console.error('[cron scrape run] failed:', err);

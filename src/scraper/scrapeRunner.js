@@ -92,14 +92,16 @@ async function runScrapeForProduct(trackedProduct) {
 }
 
 /**
- * Runs every active tracked product sequentially (kept sequential
+ * Runs active tracked products sequentially (kept sequential
  * deliberately: each Playwright launch is heavyweight, and the free-tier
  * Render instance shouldn't run several Chromium instances concurrently).
+ *
+ * Respects product.scrape_interval_minutes unless force is true.
  */
-async function runScrapeForAllActive() {
+async function runScrapeForAllActive({ force = false } = {}) {
   const { data: products, error } = await supabase
     .from('tracked_products')
-    .select('*')
+    .select('*, latest_prices(scraped_at)')
     .eq('is_active', true);
 
   if (error) throw error;
@@ -107,6 +109,28 @@ async function runScrapeForAllActive() {
   const results = [];
   for (const product of products) {
     try {
+      if (!force && product.scrape_interval_minutes) {
+        const latestPrice = Array.isArray(product.latest_prices)
+          ? product.latest_prices[0]
+          : product.latest_prices;
+        const lastScrapedAt = latestPrice?.scraped_at;
+
+        if (lastScrapedAt) {
+          const elapsedMs = Date.now() - new Date(lastScrapedAt).getTime();
+          const elapsedMinutes = Math.floor(elapsedMs / (60 * 1000));
+          if (elapsedMinutes < product.scrape_interval_minutes) {
+            console.log(
+              `[scrapeRunner] Skipping ${product.name} (${product.id}): scraped ${elapsedMinutes}m ago, interval is ${product.scrape_interval_minutes}m`
+            );
+            results.push({
+              productId: product.id,
+              skipped: true,
+              reason: `scraped ${elapsedMinutes}m ago (interval: ${product.scrape_interval_minutes}m)`,
+            });
+            continue;
+          }
+        }
+      }
       results.push(await runScrapeForProduct(product));
     } catch (err) {
       console.error(`[runScrapeForProduct] product ${product.id} threw:`, err);
