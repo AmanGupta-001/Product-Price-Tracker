@@ -14,10 +14,11 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
           cache: npm
-      - run: npm install
-      - run: node --check server.js src/routes.js src/db.js src/scraper/catalogClient.js src/scraper/scrapeRunner.js src/scraper/productScraper.js
+          cache-dependency-path: package-lock.json
+      - run: npm install --ignore-scripts
+      - run: node --check server.js src/routes.js src/db.js src/alerts.js src/scraper/catalogClient.js src/scraper/scrapeRunner.js src/scraper/productScraper.js
 
   lint-frontend:
     name: Lint Frontend
@@ -29,7 +30,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
           cache: npm
           cache-dependency-path: frontend/package-lock.json
       - run: npm install
@@ -45,7 +46,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
           cache: npm
           cache-dependency-path: frontend/package-lock.json
       - run: npm install
